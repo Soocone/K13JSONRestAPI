@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+	해당 xml 파일이 mapper 역할을 하기 위해 반드시 필요한 Doctype
+	공식문서URL: https://mybatis.org/mybatis-3/configuration.html
+ -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- 
+	Mapper의 namespace 속성
+	: 해당 매퍼파일을 호출하기 위해 정의한 인터페이스의 패키지를
+	포함한 풀 경로를 기술한다. 해당 인터페이스는 컨트롤러와 Mapeer(DAO)
+	사이에서 중재자 역할을 하는 서비스 객체로 사용된다.
+
+id
+	: 실제 호출되는 함수명과 동일한 이름으로 기술한다.
+	컨트롤러에서는 해당 mapper를 호출하기 위해 interface에 정의된
+	추상메서드를 호출한다.
+	
+resultType
+	: 쿼리 실행후 반환되는 값의 타입을 명시한다. 이때는 패키지명을
+	포함한 풀 경로를 기술해야 한다.
+	
+parameterType
+	: 쿼리문에서 사용할 파라미터를 저장한 DTO 혹은 VO객체의 타입을
+	명시한다. 패키지 명을 포함한 풀 경로를 기술해야 한다.
+	단, 컬렉션의 경우 list, map과 같이 풀경로를 생략할 수 있다.
+ -->
+ 
+ <!-- 
+ 파라미터 사용법
+ 형식1] 가령 함수명(인수1, 인수2)와 같은 메서드를 사용했다면
+ 	파라미터의 순서대로 param1, param2와 같이 사용한다.
+ 
+ 형식2] 인덱스를 사용하는 방법으로 {0}, {1}과 같이 사용한다.
+ 
+ 형식3] @Param 어노테이션을 사용하는 방법
+ 	@Param(_변수명) String 변수명 => Mapper에서는 _변수명 으로 사용한다.
+ 
+ 형식4] DTO와 같은 객체를 사용하는 방법
+ 	멤버변수에 접근시 멤버변수와 동일한 이름을 사용한다. 이때 getter()를 통해
+ 	해당 값에 접근하게 된다.
+ 
+ 형식5] 컬렉션(List, Map)을 사용하는 방법
+  -->
+<!-- 
+각 엘리먼트별 반환값
+select
+	: select한 결과 레코드를 반환한다. count(*)의 경우 int형의 반환값을 가지고
+	일반적인 경우는 DTO 객체를 List 컬렉션에 저장한 후 반환한다.
+insert
+	: 입력 성공시 1, 실패시 0을 반환한다.
+update/delete
+	: 수정, 삭제에 성공한 행의 갯수를 반환한다. 조건에 따라 여러개의 레코드가 
+	한꺼번에 적용될 수 있으므로 0, 1이 아닌 더 큰 값이 반환될 수 있다.
+ -->
+<!-- namespace에서는 서비스객체 역할을 하는 interface의 풀경로를 기술한다. -->
+<mapper namespace="mybatis.IBoardDAO">
+	 <!-- 
+		호출된 메서드명(id속성): getTotalCount
+		반환타입(resultType속성): int 즉 정수타입으로 반환
+		파라미터타입(parameterType속성): ParameterDTO 객체를 통해 모든 파라미터를 전달받는다.
+	  -->
+	<select id="getTotalCount" resultType="int" parameterType="mybatis.ParameterDTO">
+	   SELECT COUNT (*) from board
+	   
+	   <!-- 검색어가 null이 아니면서 빈값이 아닐때만 동적으로 where 절을 추가한다. -->
+	   <!-- 
+	   $: 양쪽으로 '(싱글쿼테이션)을 붙이지 않는다.
+	   #: 양쪽에 '을 붙인다.
+	    -->
+	   <if test="searchTxt!=null and !searchTxt.equals('')">
+	      WHERE 
+	      <!-- 
+	      	List컬렉션에 추가된 단어의 개수만큼 아래 쿼리문이 동적으로 추가됨
+	      	만약 "가을", "겨울" 이라는 단어가 추가되었다면
+	      	( title like '%가을%' or title like '%겨울%' ) 과 같이 쿼리문이 추가될 것이다.
+	      	
+	      	속성중 collection="searchTxt" 부분은 ParameterDTO의 멤버변수 중 List 컬렉션으로
+	      	생성된 항목을 기술한다.
+	       -->
+	      <foreach collection="searchTxt" item="str" open="(" close=")" separator="or">
+		      ${searchField} like '%'||#{str}||'%'
+	      </foreach>
+	   </if>
+	</select>
+	
+	<!-- 구간에 해당하는 게시물을 추출한다. -->
+	<select id="listPage" resultType="mybatis.BoardDTO" parameterType="mybatis.ParameterDTO">
+	   SELECT * FROM (
+	      SELECT Tb.*, rownum rNum From (
+	         SELECT * FROM board 
+	         <if test="searchTxt!=null and !searchTxt.equals('')">
+	            WHERE 
+	            <foreach collection="searchTxt" item="str" open="(" close=")" separator="or">
+					${searchField} like '%'||#{str}||'%'
+			    </foreach>
+	         </if>
+	         ORDER BY num DESC
+	      ) Tb
+	   )
+	   WHERE rNum BETWEEN #{start} AND #{end}
+	</select>
+	
+	
+	<!-- 게시물 내용보기 -->
+	<select id="view" resultType="mybatis.BoardDTO" parameterType="mybatis.ParameterDTO">
+	   SELECT * FROM board WHERE num=#{num}
+	</select>
+</mapper>
