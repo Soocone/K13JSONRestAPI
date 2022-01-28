@@ -14,13 +14,17 @@
 	포함한 풀 경로를 기술한다. 해당 인터페이스는 컨트롤러와 Mapeer(DAO)
 	사이에서 중재자 역할을 하는 서비스 객체로 사용된다.
  -->
+<!-- namespace를 통해 서비스 역할의 인터페이스와 연결한다. -->  
 <mapper namespace="mybatis.IAndroidDAO">
 
-	<!-- 
-	파라미터를 받는 두번째 방법으로 순서대로 0, 1... 로 기술한다.
-	2개의 파라미터를 통해 select한 결과를 MemberVO 객체로 반환한다.
-	 -->
 	<select id="memberList" resultType="mybatis.MemberVO">
-		SELECT * FROM member
+		SELECT * FROM member ORDER BY regidate DESC
 	</select>
+	
+	
+	<select id="memberLogin" resultType="mybatis.MemberVO" 
+		parameterType="mybatis.MemberVO">
+		SELECT * FROM member WHERE id=#{id} and pass=#{pass}
+	</select> 
+ 	 
 </mapper>
