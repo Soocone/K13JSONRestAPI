@@ -9,23 +9,30 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
+//jQuery의 Entry point(진입점). 페이지의 로딩이 끝난 직후 호출된다.
 $(function() {
+	//해당 버튼을 눌렀을때 ajax메서드를 호출한다.
     $('#btnBoard').click(function() {
         $.ajax({
-            type : 'get',
-            url : '../restapi/boardList.do',
-            data : {nowPage : $('#nowPage').val()},
+            type : 'get', //전송방식
+            url : '../restapi/boardList.do', //요청 URL
+            data : {nowPage : $('#nowPage').val()}, //파라미터
             contentType : "text/html;charset:utf-8",
-            dataType : "json",
-            success : sucCallBack,
-            error : errCallBack
+            dataType : "json", //콜백데이터 타입
+            success : sucCallBack, //요청에 성공했을때 호출되는 콜백 함수
+            error : errCallBack //실패했을때 콜백 함수
         });
     });
+	/*
+	trigger() 함수는 특정 이벤트를 자동으로 발생시켜준다.
+	아래의 경우 페이지가 로드되면 해당 버튼을 클릭해준다.
+	*/
     $('#btnBoard').trigger('click');
 });
 
 function sucCallBack(resData) {
     let tableData = "";
+    //JSON 배열을 콜백받아 개수만큼 tr태그를 생성한다.
     $(resData).each(function(index,data){
         tableData += ""
         + "<tr>"
@@ -36,9 +43,11 @@ function sucCallBack(resData) {
         + "    <td>"+data.visitcount+"</td>"
         + "</tr>"
     });
+    //해당 엘리먼트에 새로운 내용으로 교체한다.
     $('#show_data').html(tableData);
 }
 
+//실패했을때의 콜백 함수
 function errCallBack(errData) {
     console.log(errData.status+":"+errData.statusText);
 }
