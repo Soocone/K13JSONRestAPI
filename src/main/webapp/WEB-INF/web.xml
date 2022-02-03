@@ -30,6 +30,7 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	
+	<!-- CORS 필터 설저이 외부 서버의 모든 요청을 허용한다. -->
 	<filter>
 		<filter-name>logFilter</filter-name>
 		<filter-class>com.kosmo.jsonrestapi.SimpleCORSFilter</filter-class>
