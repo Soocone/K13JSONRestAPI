@@ -73,6 +73,21 @@
 		
 		
 		
-		
+	<h3>파일 업로드</h3>
+	<li>
+		<a href="./fileUpload/uploadPath.do" target="_blank">
+			upload 폴더의 물리적 경로 확인하기
+		</a>
+	</li>
+	<li>
+		<a href="./fileUpload/uploadForm.do" target="_blank">
+			파일 업로드 폼
+		</a>
+	</li>
+	<li>
+		<a href="./fileUpload/uploadList.do" target="_blank">
+			파일 목록보기
+		</a>
+	</li>	
 </body>
 </html>
